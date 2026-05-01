@@ -1,0 +1,208 @@
+NOVABITE RESTAURANTS - MENU
+
+== STARTERS ==
+
+Item: Tomato Bruschetta
+Description: Toasted sourdough topped with fresh Roma tomatoes, garlic, basil, and extra virgin olive oil.
+Dietary: Vegan
+Allergens: Contains gluten
+Price: $12.00
+
+Item: Burrata and Prosciutto
+Description: Creamy burrata cheese served with thinly sliced prosciutto, cherry tomatoes, and aged balsamic glaze.
+Allergens: Contains dairy
+Price: $18.00
+
+Item: Wild Mushroom Soup
+Description: Creamy wild mushroom soup with truffle oil and crusty bread.
+Dietary: Vegetarian
+Allergens: Contains gluten, dairy
+Price: $14.00
+
+Item: Fried Calamari
+Description: Lightly battered and fried squid rings served with marinara sauce and lemon wedges.
+Allergens: Contains gluten, shellfish
+Price: $16.00
+
+Item: Roasted Eggplant Involtini
+Description: Thinly sliced roasted eggplant rolled around a filling of vegan herbed "cheese" and sundried tomatoes, served in a zesty marinara.
+Dietary: Vegan
+Allergens: No gluten, No dairy, No eggs.
+Price: $15.00
+
+== PASTA ==
+
+Item: Spaghetti Carbonara
+Description: Classic Roman pasta with egg, Pecorino Romano, guanciale, and black pepper.
+Allergens: Contains gluten, dairy, eggs
+Price: $22.00
+
+Item: Spicy Tomato Penne
+Description: Penne pasta in a spicy tomato and garlic sauce.
+Dietary: Vegan
+Allergens: Contains gluten
+Price: $18.00
+
+Item: Bolognese Tagliatelle
+Description: Slow-cooked meat sauce over fresh egg tagliatelle.
+Allergens: Contains gluten, dairy, eggs
+Price: $24.00
+
+Item: Eggplant and Ricotta Rigatoni
+Description: Rigatoni with roasted eggplant, tomato sauce, basil, and salted ricotta.
+Dietary: Vegetarian
+Allergens: Contains gluten, dairy
+Price: $20.00
+
+Item: Clam Linguine
+Description: Linguine with fresh clams, white wine, garlic, chili, and parsley.
+Allergens: Contains gluten, shellfish
+Price: $26.00
+
+Item: Porcini Mushroom Pappardelle
+Description: Wide pasta ribbons with creamy porcini mushroom sauce.
+Dietary: Vegetarian
+Allergens: Contains gluten, dairy
+Price: $25.00
+
+== RISOTTO ==
+
+Item: Truffle Risotto
+Description: Arborio rice with black truffle, Parmigiano Reggiano, and butter.
+Dietary: Vegetarian
+Allergens: Contains dairy
+Price: $28.00
+
+Item: Seafood Risotto
+Description: Risotto with prawns, scallops, mussels, and saffron.
+Allergens: Contains shellfish, dairy
+Price: $32.00
+
+Item: Butternut Squash Risotto
+Description: Butternut squash risotto with sage and toasted pine nuts.
+Dietary: Vegan
+Price: $24.00
+
+== MAINS ==
+
+Item: Chicken Parmigiana
+Description: Breaded chicken breast topped with tomato sauce and melted mozzarella, served with roasted vegetables.
+Allergens: Contains gluten, dairy
+Price: $28.00
+
+Item: Oven Baked Sea Bass
+Description: Oven-baked Mediterranean sea bass with lemon, capers, olives, and cherry tomatoes.
+Dietary: Gluten-free
+Allergens: Contains fish
+Price: $34.00
+
+Item: Florentine T-Bone Steak
+Description: Grilled T-bone steak seasoned with rosemary, garlic, and sea salt, served with roasted potatoes.
+Dietary: Gluten-free
+Price: $48.00
+
+Item: Baked Eggplant Parmigiana
+Description: Layered baked eggplant with tomato sauce, basil, and mozzarella.
+Dietary: Vegetarian
+Allergens: Contains dairy
+Price: $24.00
+
+Item: Braised Veal Shank
+Description: Slow-braised veal shank with gremolata, served with saffron risotto.
+Allergens: Contains dairy
+Price: $38.00
+
+== PIZZA ==
+
+Item: Classic Margherita
+Description: Classic tomato sauce, fresh mozzarella, and basil.
+Dietary: Vegetarian
+Allergens: Contains gluten, dairy
+Price: $18.00
+
+Item: Plant-Based Margherita Pizza
+Description: Hand-stretched sourdough crust topped with organic tomato sauce, vegan mozzarella-style shreds, fresh basil, and extra virgin olive oil.
+Dietary: Vegan
+Allergens: Contains gluten. No dairy.
+Price: $20.00
+
+Item: Spicy Salami Pizza
+Description: Tomato sauce, mozzarella, and spicy Calabrian salami.
+Allergens: Contains gluten, dairy
+Price: $22.00
+
+Item: Four Cheese Pizza
+Description: Mozzarella, Gorgonzola, Taleggio, and Parmigiano.
+Dietary: Vegetarian
+Allergens: Contains gluten, dairy
+Price: $21.00
+
+Item: Vegan Garden Pizza
+Description: Tomato sauce, grilled zucchini, roasted peppers, olives, and capers on thin crust.
+Dietary: Vegan
+Allergens: Contains gluten
+Price: $19.00
+
+Item: Truffle and Mushroom Pizza
+Description: Truffle cream base, wild mushrooms, mozzarella, and fresh thyme.
+Dietary: Vegetarian
+Allergens: Contains gluten, dairy
+Price: $24.00
+
+== DESSERTS ==
+
+Item: Tiramisu
+Description: Classic Italian dessert with espresso-soaked ladyfingers, mascarpone cream, and cocoa.
+Allergens: Contains gluten, dairy, eggs
+Price: $12.00
+
+Item: Vanilla Panna Cotta
+Description: Vanilla panna cotta with mixed berry coulis.
+Dietary: Vegetarian
+Allergens: Contains dairy
+Price: $10.00
+
+Item: House Gelato
+Description: Three scoops of house-made gelato. Flavors: Pistachio, Chocolate Chip, Lemon.
+Allergens: Contains dairy
+Price: $9.00
+
+Item: Sicilian Cannoli
+Description: Crispy pastry shells filled with sweet ricotta and chocolate chips.
+Allergens: Contains gluten, dairy
+Price: $11.00
+
+Item: Vegan Sicilian Cannoli
+Description: A plant-based twist on the classic. Crispy vegan pastry shells filled with a whipped almond-milk "ricotta" and dairy-free dark chocolate chips.
+Dietary: Vegan
+Allergens: Contains gluten, nuts (almond). No dairy, No eggs.
+Price: $13.00
+
+== DRINKS ==
+
+Item: Sparkling and Still Water
+Description: Available in 500ml and 1L bottles.
+Price: $4.00 / $7.00
+
+Item: Italian Sodas
+Description: Lemon soda and orange soda. Vegan, gluten-free.
+Price: $6.00
+
+Item: Coffee
+Description: Espresso, Americano, Cappuccino, Macchiato. Cappuccino contains dairy.
+Price: $4.00 - $5.50
+
+Item: House Wines
+Description: House red Chianti, house white Pinot Grigio, and Prosecco.
+Price: $12.00 (Glass) / $35.00 (Carafe)
+
+Item: Fresh Juices
+Description: Fresh orange juice and homemade lemonade. Vegan, gluten-free.
+Price: $7.00
+
+== ALLERGEN NOTICE ==
+
+Our kitchen handles gluten, dairy, eggs, nuts, shellfish, and fish.
+Cross-contamination is possible. Please inform your server of any allergies before ordering.
+For a full allergen breakdown per item, ask your server for the allergen menu.
+Gluten-free pasta and pizza bases are available on request for an additional charge of 2 USD.

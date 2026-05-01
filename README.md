@@ -1,162 +1,301 @@
-# Multi-Agent RAG System – Smart Restaurant Assistant
+# NovaBite Smart Restaurant Assistant
+### Multi-Agent RAG System built with LangGraph & LangChain
 
 ---
 
-# 📌 Scenario
+## 🏗️ Architecture Overview
 
-You are building an AI system for a restaurant chain called:
+NovaBite is a production-style multi-agent AI assistant for a restaurant chain. It uses a **LangGraph state graph** to orchestrate three specialized agents, each handling a distinct domain.
 
-# **NovaBite Restaurants**
-
-NovaBite operates multiple branches and wants an AI assistant that can:
-
-- Answer customer questions from internal knowledge base (RAG)
-- Check live table availability
-- Provide menu recommendations
-- Handle follow-up questions using memory
-- Call backend tools (MCP-style or simulated server logic)
-- Route tasks intelligently using sub-agents
-
-The system **must** be architected using:
-
-- LangChain
-- Sub-agents
-- RAG
-- Tool-based execution
-- Memory
-- Proper orchestration
-
-> ⚠️ This is NOT a chatbot demo.  
-> This is a real system design + implementation evaluation.
+```
+User Input
+    ↓
+Orchestrator Agent (Intent Classification)
+    ↓
+┌───────────────┬──────────────────┬─────────────┐
+│   RAG Agent   │ Operations Agent │   Fallback  │
+│ (Knowledge)   │   (Tools/MCP)    │             │
+└───────────────┴──────────────────┴─────────────┘
+    ↓
+Assembler Node (Response + Memory Update)
+    ↓
+User Response
+```
 
 ---
 
-# 🎯 Goal
+## 📁 Project Structure
 
-Build a production-style **multi-agent architecture** that:
-
-- Uses RAG for restaurant knowledge
-- Uses tool-calling for operational tasks
-- Delegates properly through sub-agents
-- Demonstrates memory continuity
-- Minimizes hallucinations
-- Can be evaluated for retrieval accuracy
-
----
-
-# 🏗️ Required Architecture
-
-You must implement the following components:
-
----
-
-## 1️⃣ Main Orchestrator Agent
-
-### Responsibilities
-
-- Classify user intent
-- Route requests to appropriate sub-agent
-- Maintain conversation memory
-- Merge and validate sub-agent responses
-- Decide when to call tools
-- Handle ambiguity and clarification
-- Prevent hallucinated outputs
-
-⚠️ The orchestrator must NOT contain business logic directly.  
-It must delegate to sub-agents.
+```
+novabite/
+├── app.py                  # CLI entry point
+├── streamlit_app.py        # Streamlit chat UI
+├── agents.py               # All three agent nodes
+├── tools.py                # Simulated MCP tools
+├── graph.py                # LangGraph graph + NovaState
+├── rag.py                  # Ingestion, chunking, retrieval
+├── state.py                # NovaState TypedDict
+├── .env                    # API keys
+├── requirements.txt
+└── data/
+    ├── menu.txt            # Italian restaurant menu
+    └── loyalty.txt         # Loyalty program rules
+```
 
 ---
 
-## 2️⃣ Required Sub-Agents
+## 🤖 Component Breakdown
+
+### 1. Main Orchestrator Agent
+
+The orchestrator classifies every user message into one of three intents:
+
+| Intent | Routes To | Examples |
+|---|---|---|
+| `rag` | RAG Agent | Menu questions, allergens, loyalty rules |
+| `operations` | Operations Agent | Reservations, availability, specials |
+| `fallback` | Fallback Node | Greetings, off-topic questions |
+
+**Implementation:** Uses `llm.with_structured_output()` with a Pydantic model (`IntentClassification`) that returns intent, confidence score, and clarification flag. Routes to fallback if confidence < 0.5.
+
+```python
+class IntentClassification(BaseModel):
+    intent: Literal["rag", "operations", "fallback"]
+    confidence: float = Field(ge=0.0, le=1.0)
+    needs_clarification: bool = False
+```
+
+The orchestrator receives full `chat_history` for context — enabling short follow-up messages like "yes please" or "ok" to route correctly based on conversation context.
+
+⚠️ The orchestrator contains **zero business logic** — it only classifies and routes.
 
 ---
 
-### 🍽️ A. Restaurant Knowledge RAG Agent
+### 2. RAG Agent (Restaurant Knowledge)
 
-Responsible for answering questions from internal documents such as (You don't have to implement all domains below just pick 2):
+Handles all knowledge-based questions from two domains:
+- **Menu** — items, descriptions, allergens, dietary options, prices
+- **Loyalty Program** — earning rules, tiers, redemption, birthday rewards
 
-- Menu descriptions  
-- Allergen information  
-- Opening hours  
-- Branch policies  
-- Loyalty program rules  
-- Refund policy  
-- Event hosting information  
+**RAG Pipeline:**
 
----
+```
+data/menu.txt + data/loyalty.txt
+        ↓
+DocumentLoader (txt/pdf/docx support)
+        ↓
+RecursiveCharacterTextSplitter
+        ↓
+OllamaEmbeddings (nomic-embed-text)
+        ↓
+FAISS Vector Store
+        ↓
+similarity_search_with_score (k=3)
+        ↓
+Score Threshold Filter
+        ↓
+LLM (Grounded Answer Generation)
+```
 
-### 🔍 RAG Implementation Requirements
+#### Chunking Strategy
+- **`RecursiveCharacterTextSplitter`** with `chunk_size=300`, `chunk_overlap=50`
+- Separators: `["\n\n", "\n", ". ", " ", ""]`
+- Section headers (`== PASTA ==`) act as natural split boundaries
+- Each menu item stays within its own chunk to prevent allergen/description separation
+- **Justification:** Menu items are short, structured entries (~150-250 chars). Small chunks ensure each item embeds as a single semantic unit rather than mixing multiple items.
 
-You must implement:
+#### Embedding Model
+- **`nomic-embed-text`** via Ollama (local)
+- **Justification:** Strong semantic similarity for food/hospitality domain, runs fully locally with no API cost, optimized for retrieval tasks.
 
-- Document ingestion pipeline
-- Chunking strategy (**justify your choice**)
-- Embedding model (**justify your choice**)
-- Vector database (FAISS / Chroma / etc.)
-- Retrieval strategy (top-k, optional hybrid)
-- Context filtering
-- Hallucination prevention
-- Grounded answer generation
+#### Vector Database
+- **FAISS** with L2 distance scoring
+- Lazy loading pattern — vector store initializes on first query, not at import time
+- Persisted to disk at `vector_store/`
+- **Important:** FAISS uses L2 distance (lower = better), not cosine similarity. Threshold set to `0.8` accordingly.
 
-Your system must NOT hallucinate nonexistent menu items.
+#### Retrieval Strategy
+- `k=3` top results
+- Score threshold filter: `score <= 0.8`
+- Chunks under 50 chars filtered as noise
+- Returns `(context, sources)` tuple for transparency
 
----
-
-### Example RAG Queries
-
-- “Do you have vegan pasta?”
-- “Is the chicken grilled or fried?”
-- “What are your opening hours on weekends?”
-- “Do you host birthday events?”
-- “What’s included in the premium catering package?”
-
----
-
-### 🛠️ B. Operations Agent (Tool-Based / MCP-Style)
-
-This agent handles live operational queries.
-
-You may:
-
-- Connect to a real MCP server  
-**OR**
-- Implement functions that simulate server logic
-
-The system must behave like it is calling real external tools.
-
----
-
-### Required Tools (Implement At Least Two)
-
-
-check_table_availability(date, time, branch)
-book_table(name, date, time, branch)
-get_today_special(branch)
-check_loyalty_points(user_id)
-
+#### Hallucination Prevention
+- RAG agent uses **context-only prompt** — strictly forbidden from using outside knowledge
+- Returns refusal message if retrieved context doesn't support the question
+- `temperature=0` for deterministic, grounded responses
 
 ---
 
-# ⏳ Time Limit
+### 3. Operations Agent (Tool-Based / MCP-Style)
 
-You have **2 days (48 hours)** from the moment you receive this test to complete and submit your solution.
+Handles live operational queries using a **ReAct loop** via `create_react_agent`.
+
+#### Tools Implemented
+
+| Tool | Parameters | Description |
+|---|---|---|
+| `check_table_availability` | `date, time, branch` | If/else logic — peak hours (19:00, 19:30, 20:00) always fully booked, returns confirmed alternative times |
+| `book_table` | `name, date, time, branch, party_size` | Generates unique reservation ID, returns booking confirmation |
+| `get_today_special` | `branch` | Branch-keyed dict of daily specials |
+| `check_loyalty_points` | `user_id` | Returns points balance and tier (Silver/Gold/Platinum) |
+
+#### Booking Protocol (Enforced via Prompt)
+```
+Step 1: call check_table_availability FIRST
+Step 2: if available → immediately call book_table
+Step 3: if unavailable → suggest confirmed alternative times
+```
+
+#### REDIRECT_TO_RAG Signal
+If the user asks a knowledge question mid-operations flow (e.g. "does the pasta have gluten?"), the operations agent returns `REDIRECT_TO_RAG` — the graph re-routes to the RAG agent without returning to the orchestrator.
+
+#### Today's Date Injection
+```python
+operations_prompt = f"Today's date is {date.today().strftime('%Y-%m-%d')}."
+```
+Prevents date hallucination when users say "this Friday" or "tomorrow".
 
 ---
 
-# 📬 Submission Instructions
+## 🧠 Memory Design
 
-1. Fork the provided repository.
-2. Implement your solution in your fork.
-3. Ensure your repository includes:
-   - Complete source code
-   - Updated README with:
-     - Architecture explanation
-     - RAG design decisions
-     - Tool simulation or MCP integration explanation
-     - Memory design explanation
-     - Example queries and outputs
-     - Assumptions made
-4. Push your final implementation to your forked repository.
-5. Send the repository link via email to:
+Memory is handled at two levels:
 
-📩 **careers@fekracorp.com**
+| Level | Implementation | Scope |
+|---|---|---|
+| Within-session | `MemorySaver` checkpointer | Persists `chat_history` across turns via `thread_id` |
+| Cross-session | `InMemoryStore` | Available for cross-session user data |
+
+**Key design decision:** `app.py` and `streamlit_app.py` pass only the new turn's fields on each invoke — `chat_history` is never overwritten by the caller. `MemorySaver` restores it automatically from the `thread_id` checkpoint.
+
+```python
+# Only new turn fields passed — MemorySaver handles the rest
+state = {
+    "user_question": user_input,
+    "user_intent": "",
+    "rag_context": "",
+    "rag_answer": "",
+    "tool_output": "",
+    "final_response": ""
+}
+```
+
+---
+
+## 💬 Example Queries and Outputs
+
+### RAG — Menu
+```
+User: Do you have any vegan pasta?
+Nova: Yes, we have the Spicy Tomato Penne — penne pasta in a spicy tomato
+      and garlic sauce. It's vegan and contains gluten. Priced at $18.00.
+```
+
+### RAG — Allergens
+```
+User: What allergens are in the Spaghetti Carbonara?
+Nova: The Spaghetti Carbonara contains gluten, dairy, and eggs.
+```
+
+### RAG — Loyalty
+```
+User: How do I earn loyalty points?
+Nova: You earn 1 point for every 1 USD spent. Points are credited within
+      24 hours. Double points every Wednesday for dine-in orders.
+```
+
+### Operations — Booking Flow
+```
+User: Book a table for John this Friday at 7pm at the Downtown branch
+Nova: How many people will be joining?
+User: 4
+Nova: The Downtown branch is fully booked at 19:00. Confirmed available
+      times: 18:00, 21:00, 21:30. Which would you prefer?
+User: 21:00
+Nova: Booking Confirmed! Reservation ID: NB-2026-1B8E
+      Guest: John | Date: 2026-05-09 | Time: 21:00 | Party: 4
+```
+
+### Operations — Today's Special
+```
+User: What is today's special at Downtown?
+Nova: Today's special at NovaBite Downtown: Osso Buco alla Milanese
+      with saffron risotto.
+```
+
+### Fallback
+```
+User: Who is the president?
+Nova: I'm Nova, NovaBite's assistant. I can help you with:
+      - Table reservations
+      - Menu and allergen information
+      - Loyalty points and today's specials
+```
+
+---
+
+## ⚙️ Setup Instructions
+
+### Prerequisites
+- Python 3.10+
+- Ollama installed with `nomic-embed-text` pulled
+- Groq API key or GitHub Models token
+
+### Installation
+
+```bash
+git clone <your-repo-url>
+cd novabite
+pip install -r requirements.txt
+```
+
+### Environment Variables
+Create a `.env` file:
+```env
+GROQ_API_KEY=your_groq_api_key
+# OR
+GITHUB_TOKEN=your_github_token
+```
+
+### Pull Embedding Model
+```bash
+ollama pull nomic-embed-text
+```
+
+### Run
+
+**CLI:**
+```bash
+python app.py
+```
+
+**Streamlit UI:**
+```bash
+streamlit run streamlit_app.py
+```
+
+---
+
+## 🧩 Assumptions Made
+
+- Table availability uses deterministic if/else logic (peak hours always busy) — simulates real reservation system behavior without a database
+- Loyalty points are stored in a hardcoded dict — simulates a user database lookup
+- Today's specials rotate by branch — simulates a daily specials API
+- Two knowledge domains selected: **menu** and **loyalty program** (as permitted by spec)
+- Memory is in-memory only — resets on server restart (production would use Redis or PostgreSQL)
+- FAISS L2 distance threshold set to `0.8` — calibrated by inspecting actual score distributions, not assumed
+
+---
+
+## 🛠️ Tech Stack
+
+| Component | Technology |
+|---|---|
+| Orchestration | LangGraph |
+| LLM | Groq (llama-3.3-70b) / GitHub Models (gpt-4o-mini) |
+| Embeddings | nomic-embed-text (Ollama) |
+| Vector Store | FAISS |
+| Memory | LangGraph MemorySaver + InMemoryStore |
+| UI | Streamlit |
+| Framework | LangChain |
