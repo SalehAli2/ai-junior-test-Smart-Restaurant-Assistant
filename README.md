@@ -115,7 +115,8 @@ LLM (Grounded Answer Generation)
 - `k=4` top results
 - Score threshold filter: `score <= 1.2`
 - Returns `(context, sources)` tuple for transparency
-
+- Future consideration: As the knowledge base scales to additional domains (opening hours, branch policies, refund policy, event hosting), metadata filtering is recommended — tagging each chunk with {"domain": "menu", "section": "pasta", "dietary": "vegan"} at ingest time and filtering before vector search. This prevents cross-domain contamination — a loyalty points query should never surface menu chunks, and a refund policy question should never pull from event hosting docs. Combined with hybrid search for exact term matching on allergen names, dish names, and policy keywords where semantic search alone can return loosely related results.
+  
 #### Hallucination Prevention
 - RAG agent uses **context-only prompt** — strictly forbidden from using outside knowledge
 - Returns refusal message if retrieved context doesn't support the question
