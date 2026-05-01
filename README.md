@@ -3,7 +3,7 @@
 
 ---
 
-## 🏗️ Architecture Overview
+##  Architecture Overview
 
 NovaBite is a production-style multi-agent AI assistant for a restaurant chain. It uses a **LangGraph state graph** to orchestrate three specialized agents, each handling a distinct domain.
 
