@@ -177,9 +177,6 @@ state = {
 ---
 
 ## 💬 Example Queries and Outputs
-<img width="1573" height="762" alt="WhatsApp Image 2026-05-01 at 4 24 59 PM (1)" src="https://github.com/user-attachments/assets/e4e058b8-d346-4106-a49a-5e1e7f23b071" />
-<img width="1559" height="337" alt="image" src="https://github.com/user-attachments/assets/ae9f38ca-bd3a-4f07-b02d-8512e54b867e" />
-
 
 ### RAG — Menu
 ```
@@ -232,12 +229,6 @@ Nova: I'm Nova, NovaBite's assistant. I can help you with:
 ---
 
 ## ⚙️ Setup Instructions
-
-### Prerequisites
-- Python 3.10+
-- Ollama installed with `nomic-embed-text` pulled
-- Groq API key or GitHub Models token
-
 ### Installation
 
 ```bash
@@ -280,7 +271,7 @@ streamlit run streamlit_app.py
 | Component | Technology |
 |---|---|
 | Orchestration | LangGraph |
-| LLM | Groq (llama-3.3-70b) / GitHub Models (gpt-4o-mini) |
+| LLM | GitHub Model (gpt-4o-mini) |
 | Embeddings | nomic-embed-text (Ollama) |
 | Vector Store | FAISS |
 | Memory | LangGraph MemorySaver |
