@@ -177,6 +177,9 @@ state = {
 ---
 
 ## 💬 Example Queries and Outputs
+<img width="1573" height="762" alt="WhatsApp Image 2026-05-01 at 4 24 59 PM (1)" src="https://github.com/user-attachments/assets/e4e058b8-d346-4106-a49a-5e1e7f23b071" />
+<img width="1559" height="337" alt="image" src="https://github.com/user-attachments/assets/ae9f38ca-bd3a-4f07-b02d-8512e54b867e" />
+
 
 ### RAG — Menu
 ```
