@@ -6,7 +6,7 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_ollama import OllamaEmbeddings, ChatOllama
 from tools import check_table_availability, book_table, get_today_special, check_loyalty_points
 from rag import retrieve_docs
-from langchain_groq import ChatGroq
+from langchain_openai import ChatOpenAI
 from state import NovaState
 from datetime import date
 from langchain.agents import create_agent
@@ -18,9 +18,10 @@ load_dotenv()
 
 
 
-llm = ChatGroq(
-    model="llama-3.3-70b-versatile",
-    api_key=os.getenv("GROQ_API_KEY"),
+llm = ChatOpenAI(
+    model="gpt-4o-mini",
+    api_key=os.getenv("GITHUB_TOKEN"),
+    base_url="https://models.inference.ai.azure.com",
     temperature=0,
 )
 
