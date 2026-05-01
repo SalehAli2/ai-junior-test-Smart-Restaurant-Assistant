@@ -28,13 +28,12 @@ User Response
 
 ```
 novabite/
-├── app.py                  # CLI entry point
 ├── streamlit_app.py        # Streamlit chat UI
 ├── agents.py               # All three agent nodes
 ├── tools.py                # Simulated MCP tools
-├── graph.py                # LangGraph graph + NovaState
+├── graph.py                # LangGraph graph
 ├── rag.py                  # Ingestion, chunking, retrieval
-├── state.py                # NovaState TypedDict
+├── state.py                # NovaState
 ├── .env                    # API keys
 ├── requirements.txt
 └── data/
@@ -67,8 +66,6 @@ class IntentClassification(BaseModel):
 
 The orchestrator receives full `chat_history` for context — enabling short follow-up messages like "yes please" or "ok" to route correctly based on conversation context.
 
-⚠️ The orchestrator contains **zero business logic** — it only classifies and routes.
-
 ---
 
 ### 2. RAG Agent (Restaurant Knowledge)
@@ -98,7 +95,7 @@ LLM (Grounded Answer Generation)
 ```
 
 #### Chunking Strategy
-- **`RecursiveCharacterTextSplitter`** with `chunk_size=300`, `chunk_overlap=50`
+- **`RecursiveCharacterTextSplitter`** with `chunk_size=400`, `chunk_overlap=100`
 - Separators: `["\n\n", "\n", ". ", " ", ""]`
 - Section headers (`== PASTA ==`) act as natural split boundaries
 - Each menu item stays within its own chunk to prevent allergen/description separation
@@ -112,12 +109,11 @@ LLM (Grounded Answer Generation)
 - **FAISS** with L2 distance scoring
 - Lazy loading pattern — vector store initializes on first query, not at import time
 - Persisted to disk at `vector_store/`
-- **Important:** FAISS uses L2 distance (lower = better), not cosine similarity. Threshold set to `0.8` accordingly.
+- **Important:** FAISS uses L2 distance (lower = better), not cosine similarity. Threshold set to `1.2` accordingly.
 
 #### Retrieval Strategy
-- `k=3` top results
-- Score threshold filter: `score <= 0.8`
-- Chunks under 50 chars filtered as noise
+- `k=4` top results
+- Score threshold filter: `score <= 1.2`
 - Returns `(context, sources)` tuple for transparency
 
 #### Hallucination Prevention
@@ -129,7 +125,7 @@ LLM (Grounded Answer Generation)
 
 ### 3. Operations Agent (Tool-Based / MCP-Style)
 
-Handles live operational queries using a **ReAct loop** via `create_react_agent`.
+Handles live operational queries using a ReACT agent
 
 #### Tools Implemented
 
@@ -165,9 +161,8 @@ Memory is handled at two levels:
 | Level | Implementation | Scope |
 |---|---|---|
 | Within-session | `MemorySaver` checkpointer | Persists `chat_history` across turns via `thread_id` |
-| Cross-session | `InMemoryStore` | Available for cross-session user data |
 
-**Key design decision:** `app.py` and `streamlit_app.py` pass only the new turn's fields on each invoke — `chat_history` is never overwritten by the caller. `MemorySaver` restores it automatically from the `thread_id` checkpoint.
+**Key design decision:** `streamlit_app.py` pass only the new turn's fields on each invoke — `chat_history` is never overwritten by the caller. `MemorySaver` restores it automatically from the `thread_id` checkpoint.
 
 ```python
 # Only new turn fields passed — MemorySaver handles the rest
@@ -245,8 +240,6 @@ Nova: I'm Nova, NovaBite's assistant. I can help you with:
 ### Installation
 
 ```bash
-git clone <your-repo-url>
-cd novabite
 pip install -r requirements.txt
 ```
 
@@ -254,8 +247,6 @@ pip install -r requirements.txt
 Create a `.env` file:
 ```env
 GROQ_API_KEY=your_groq_api_key
-# OR
-GITHUB_TOKEN=your_github_token
 ```
 
 ### Pull Embedding Model
@@ -264,11 +255,6 @@ ollama pull nomic-embed-text
 ```
 
 ### Run
-
-**CLI:**
-```bash
-python app.py
-```
 
 **Streamlit UI:**
 ```bash
@@ -283,8 +269,8 @@ streamlit run streamlit_app.py
 - Loyalty points are stored in a hardcoded dict — simulates a user database lookup
 - Today's specials rotate by branch — simulates a daily specials API
 - Two knowledge domains selected: **menu** and **loyalty program** (as permitted by spec)
-- Memory is in-memory only — resets on server restart (production would use Redis or PostgreSQL)
-- FAISS L2 distance threshold set to `0.8` — calibrated by inspecting actual score distributions, not assumed
+- Memory is in-memory only — resets on server restart
+- FAISS L2 distance threshold set to `1.2` — calibrated by inspecting actual score distributions, not assumed
 
 ---
 
@@ -296,6 +282,6 @@ streamlit run streamlit_app.py
 | LLM | Groq (llama-3.3-70b) / GitHub Models (gpt-4o-mini) |
 | Embeddings | nomic-embed-text (Ollama) |
 | Vector Store | FAISS |
-| Memory | LangGraph MemorySaver + InMemoryStore |
+| Memory | LangGraph MemorySaver |
 | UI | Streamlit |
 | Framework | LangChain |
