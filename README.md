@@ -87,7 +87,7 @@ OllamaEmbeddings (nomic-embed-text)
         ↓
 FAISS Vector Store
         ↓
-similarity_search_with_score (k=3)
+similarity_search_with_score 
         ↓
 Score Threshold Filter
         ↓
@@ -155,8 +155,6 @@ Prevents date hallucination when users say "this Friday" or "tomorrow".
 ---
 
 ## 🧠 Memory Design
-
-Memory is handled at two levels:
 
 | Level | Implementation | Scope |
 |---|---|---|
