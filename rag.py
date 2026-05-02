@@ -17,8 +17,8 @@ embedder = OllamaEmbeddings(
 
 CHUNK_SIZE = 400                    
 CHUNK_OVERLAP = 100             
-TOP_K = 4
-SCORE_THRESHOLD = 1.2
+TOP_K = 6
+SCORE_THRESHOLD = 1.5
 VECTOR_STORE_PATH = "vector_store"
 
 text_splitter = RecursiveCharacterTextSplitter(

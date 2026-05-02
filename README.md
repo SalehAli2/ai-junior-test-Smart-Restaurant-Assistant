@@ -114,8 +114,14 @@ LLM (Grounded Answer Generation)
 - **Important:** FAISS uses L2 distance (lower = better), not cosine similarity. Threshold set to `1.2` accordingly.
 
 #### Retrieval Strategy
+<<<<<<< Updated upstream
 - `k=6` top results
 - Score threshold filter: `score <= 1.5`
+=======
+- `k=` top results
+- Score threshold filter: `score <= 0.8`
+- Chunks under 50 chars filtered as noise
+>>>>>>> Stashed changes
 - Returns `(context, sources)` tuple for transparency
 - Future consideration: As the knowledge base scales to additional domains (opening hours, branch policies, refund policy, event hosting), metadata filtering is recommended — tagging each chunk with {"domain": "menu", "section": "pasta", "dietary": "vegan"} at ingest time and filtering before vector search. This prevents cross-domain contamination — a loyalty points query should never surface menu chunks, and a refund policy question should never pull from event hosting docs. Combined with hybrid search for exact term matching on allergen names, dish names, and policy keywords where semantic search alone can return loosely related results.
 
