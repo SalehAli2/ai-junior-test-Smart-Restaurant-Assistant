@@ -42,7 +42,7 @@ def load_documents(data_dir: str = "data/") -> list[Document]:
             loader = PyPDFLoader(str(file_path))
         elif file_path.suffix.lower() == ".txt":
             loader = TextLoader(str(file_path), encoding="utf-8")
-        else:  # .doc or .docx
+        else:
             loader = UnstructuredWordDocumentLoader(str(file_path))
         
         docs.extend(loader.load())
@@ -60,7 +60,6 @@ def get_vector_store():
                 VECTOR_STORE_PATH, embedder, allow_dangerous_deserialization=True
             )
         else:
-            print("Ingesting documents...")
             docs = load_documents()
             chunks = text_splitter.split_documents(docs)
             get_vector_store.vector_store = FAISS.from_documents(chunks, embedder)
@@ -74,7 +73,6 @@ def ingest():
     get_vector_store()
 
 def retrieve_docs(query: str, k: int = TOP_K):
-    """Retrieve relevant context and sources"""
     vector_store = get_vector_store()
     results = vector_store.similarity_search_with_score(query, k=k)
     
