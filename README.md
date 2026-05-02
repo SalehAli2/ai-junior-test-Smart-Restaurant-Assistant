@@ -87,6 +87,8 @@ OllamaEmbeddings (nomic-embed-text)
         ↓
 FAISS Vector Store
         ↓
+Query Rewriter (on follow-up turns)
+        ↓
 similarity_search_with_score 
         ↓
 Score Threshold Filter
@@ -112,17 +114,35 @@ LLM (Grounded Answer Generation)
 - **Important:** FAISS uses L2 distance (lower = better), not cosine similarity. Threshold set to `1.2` accordingly.
 
 #### Retrieval Strategy
-- `k=4` top results
-- Score threshold filter: `score <= 1.2`
+- `k=6` top results
+- Score threshold filter: `score <= 1.5`
 - Returns `(context, sources)` tuple for transparency
 - Future consideration: As the knowledge base scales to additional domains (opening hours, branch policies, refund policy, event hosting), metadata filtering is recommended — tagging each chunk with {"domain": "menu", "section": "pasta", "dietary": "vegan"} at ingest time and filtering before vector search. This prevents cross-domain contamination — a loyalty points query should never surface menu chunks, and a refund policy question should never pull from event hosting docs. Combined with hybrid search for exact term matching on allergen names, dish names, and policy keywords where semantic search alone can return loosely related results.
+
+#### Query Rewriting
+To handle follow-up questions correctly, a query rewriting step runs before retrieval on every turn where `chat_history` is non-empty:
+User Follow-up Question
+        ↓
+Query Rewriter (LLM) — only when chat_history exists
+        ↓
+Standalone Query
+        ↓
+retrieve_docs(standalone_query)
   
+**Why it's needed:** Without rewriting, follow-ups like "What allergens does it have?" or "Tell me about the Carbonara" embed poorly and either miss the score threshold or retrieve wrong chunks entirely.
+
+**Rewriting rules enforced via prompt:**
+1. Expand any shorthand or nickname to its full name as mentioned in conversation history — e.g. "the Carbonara" → "Spaghetti Carbonara", "the top tier" → actual loyalty tier name
+2. Resolve all pronouns (it, they, those, that) using conversation history
+3. If the pronoun refers to a list of items, expand the query to mention each item by name explicitly — e.g. "What allergens does it have?" after listing 6 pasta dishes → full query naming all 6 dishes
+4. If "the first one", "the second one" etc. refers to a numbered list, resolve to the actual item at that position
+
+**Key design decision:** The rewriter only triggers when `chat_history` is non-empty — skipping the extra LLM call on the first turn. The rewritten query is used **only for retrieval** — the original question is still passed to `rag_chain` so the response feels natural in conversation.
+
 #### Hallucination Prevention
 - RAG agent uses **context-only prompt** — strictly forbidden from using outside knowledge
-- Returns refusal message if retrieved context doesn't support the question
+- Returns refusal message if retrieved context doesn't support the question — with no partial answers or alternative suggestions blended in
 - `temperature=0` for deterministic, grounded responses
-
----
 
 ### 3. Operations Agent (Tool-Based / MCP-Style)
 
@@ -178,6 +198,11 @@ state = {
 ---
 
 ## 💬 Example Queries and Outputs
+<img width="922" height="804" alt="Screenshot 2026-05-02 141312" src="https://github.com/user-attachments/assets/4df6a311-64ee-4415-ab65-de7ab74863ea" />
+
+<img width="765" height="729" alt="Screenshot 2026-05-02 141337" src="https://github.com/user-attachments/assets/d3a76259-22fd-4c27-9459-26b23c87634f" />
+
+
 
 ### RAG — Menu
 ```
