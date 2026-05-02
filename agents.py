@@ -11,7 +11,7 @@ from state import NovaState
 from datetime import date
 from langchain.agents import create_agent
 from pydantic import BaseModel, Field
-
+from langchain_openai import ChatOpenAI
 import os
 from dotenv import load_dotenv
 load_dotenv()
@@ -72,6 +72,8 @@ def orchestrator_node(state: NovaState, config: RunnableConfig):
 
 
 
+
+
 rag_prompt = ChatPromptTemplate.from_messages([
     ("system",
      "You are the NovaBite Knowledge Specialist. Answer using ONLY the provided context.\n\n"
@@ -83,28 +85,65 @@ rag_prompt = ChatPromptTemplate.from_messages([
      "'I'm sorry, I only have information regarding our menu and loyalty program.'\n\n"
      "CONTEXT:\n{context}"
      "Sources:\n{sources}"),
+    ("placeholder", "{chat_history}"),
     ("human", "{question}")
 ])
 
 rag_chain = (rag_prompt | llm | StrOutputParser())
 
+rewrite_prompt = ChatPromptTemplate.from_messages([
+    ("system",
+     "You are a query rewriter for a restaurant assistant. "
+     "Given a conversation history and a follow-up question, rewrite it into a standalone query.\n\n"
+     "RULES:\n"
+     "1. Expand any shorthand or nickname to its full name as mentioned in the conversation history. "
+     "For example: 'the Carbonara' → 'Spaghetti Carbonara', 'the first one' → the actual dish name, "
+     "'the top tier' → the actual loyalty tier name.\n"
+     "2. Resolve all pronouns (it, they, those, that) using the conversation history.\n"
+     "3. If the pronoun refers to a LIST of items, expand the query to mention each item by name explicitly. "
+     "For example: 'What allergens does it have?' after a list of 6 pasta dishes → "
+     "'What allergens are in Spaghetti Carbonara, Spicy Tomato Penne, Clam Linguine, "
+     "Porcini Mushroom Pappardelle, Bolognese Tagliatelle, and Eggplant and Ricotta Rigatoni?'\n"
+     "4. If 'the first one', 'the second one', etc. refers to a numbered list in the conversation, "
+     "resolve it to the actual item at that position.\n"
+     "5. Return ONLY the rewritten query, nothing else."),
+    ("placeholder", "{chat_history}"),
+    ("human", "{question}")
+])
+
+rewrite_chain = (rewrite_prompt | llm | StrOutputParser())
+
+
 def rag_node(state: NovaState, config: RunnableConfig):
     question = state["user_question"]
-    context, sources = retrieve_docs(question)
+    chat_history = state.get("chat_history", [])
+
+    standalone_question = (
+        rewrite_chain.invoke({"question": question, "chat_history": chat_history}, config)
+        if chat_history else question
+    )
+
+    context, sources = retrieve_docs(standalone_question)
+
     if context == "No relevant information found.":
         answer = "I'm sorry, I only have information regarding our menu and loyalty program."
         return {
             "rag_context": context,
             "rag_answer": answer
         }
+
     answer = rag_chain.invoke(
-        {"context": context, "question": question, "sources": str(sources)},
+        {"context": context, "question": question, "sources": str(sources), "chat_history": chat_history},
         config
     )
+
     return {
         "rag_context": context,
         "rag_answer": answer
     }
+
+
+
 
 operations_prompt = """
     You are NovaBite's Operations Assistant.
