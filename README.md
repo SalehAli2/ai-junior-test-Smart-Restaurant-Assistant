@@ -198,6 +198,7 @@ state = {
 ---
 
 ## 💬 Example Queries and Outputs
+### Screenshots
 <img width="922" height="804" alt="Screenshot 2026-05-02 141312" src="https://github.com/user-attachments/assets/4df6a311-64ee-4415-ab65-de7ab74863ea" />
 
 <img width="765" height="729" alt="Screenshot 2026-05-02 141337" src="https://github.com/user-attachments/assets/d3a76259-22fd-4c27-9459-26b23c87634f" />
