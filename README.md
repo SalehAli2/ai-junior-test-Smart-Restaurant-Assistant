@@ -271,7 +271,7 @@ pip install -r requirements.txt
 ### Environment Variables
 Create a `.env` file:
 ```env
-GROQ_API_KEY=your_groq_api_key
+GITHUB_TOKEN=your_github_token
 ```
 
 ### Pull Embedding Model
